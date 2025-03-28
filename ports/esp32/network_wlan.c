@@ -40,6 +40,7 @@
 #include "modnetwork.h"
 
 #include "esp_wifi.h"
+#include "esp_wps.h"
 #include "esp_log.h"
 #include "esp_psram.h"
 
@@ -771,6 +772,7 @@ static const mp_rom_map_elem_t wlan_if_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_PM_NONE), MP_ROM_INT(WIFI_PS_NONE) },
     { MP_ROM_QSTR(MP_QSTR_PM_PERFORMANCE), MP_ROM_INT(WIFI_PS_MIN_MODEM) },
     { MP_ROM_QSTR(MP_QSTR_PM_POWERSAVE), MP_ROM_INT(WIFI_PS_MAX_MODEM) },
+    { MP_ROM_QSTR(MP_QSTR_wps_start), MP_ROM_PTR(&network_wlan_wps_start_obj) }
 };
 static MP_DEFINE_CONST_DICT(wlan_if_locals_dict, wlan_if_locals_dict_table);
 
@@ -793,3 +795,16 @@ MP_DEFINE_CONST_OBJ_TYPE(
     );
 
 #endif // MICROPY_PY_NETWORK_WLAN
+
+static void start_wps() {
+    esp_wps_config_t config = WPS_CONFIG_INIT_DEFAULT(WPS_TYPE_PBC);
+    ESP_ERROR_CHECK(esp_wifi_wps_enable(&config));
+    ESP_ERROR_CHECK(esp_wifi_wps_start(0));
+}
+
+STATIC mp_obj_t network_wlan_wps_start(mp_obj_t self_in) {
+    start_wps();
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(network_wlan_wps_start_obj, network_wlan_wps_start);
+
